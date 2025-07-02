@@ -34,7 +34,19 @@ if os.environ.get("WEBSOCKET_TRACE", "false").lower() == "true":
     websocket.enableTrace(True)
 
 # Host where ComfyUI is running
-COMFY_HOST = "127.0.0.1:8188"
+# Support environment variables for flexible deployment
+COMFYUI_URL = os.environ.get("COMFYUI_URL", "http://127.0.0.1:8188")
+COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1:8188")
+
+# Parse COMFYUI_URL if provided, otherwise use COMFYUI_HOST
+if COMFYUI_URL != "http://127.0.0.1:8188":
+    from urllib.parse import urlparse
+    parsed = urlparse(COMFYUI_URL)
+    COMFY_HOST = f"{parsed.hostname}:{parsed.port}"
+else:
+    COMFY_HOST = COMFYUI_HOST
+
+print(f"worker-comfyui - Using ComfyUI host: {COMFY_HOST}")
 # Enforce a clean state after each job is done
 # see https://docs.runpod.io/docs/handler-additional-controls#refresh-worker
 REFRESH_WORKER = os.environ.get("REFRESH_WORKER", "false").lower() == "true"
